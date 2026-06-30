@@ -2,13 +2,14 @@
 # Setup the project
 #
 cmake_minimum_required(VERSION 3.16...3.27)
-project(B1)
+project(QCRNG)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # See the documentation for a guide on how to enable/disable specific components
 #
 find_package(Geant4 REQUIRED ui_all vis_all)
+find_package(ROOT REQUIRED COMPONENTS RIO Tree)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
@@ -22,7 +23,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 add_executable(QCRNG QCRNG.cc ${sources} ${headers})
 target_include_directories(QCRNG PRIVATE include)
-target_link_libraries(QCRNG PRIVATE ${Geant4_LIBRARIES})
+target_link_libraries(QCRNG PRIVATE ${Geant4_LIBRARIES} ROOT::RIO ROOT::Tree)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

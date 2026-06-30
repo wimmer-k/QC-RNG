@@ -1,57 +1,78 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
 /// \file EventAction.cc
 /// \brief Implementation of the QCRNG::EventAction class
 
 #include "EventAction.hh"
-
 #include "RunAction.hh"
+#include "OutputManager.hh"
+#include "QCRNGConfig.hh"
 
-namespace QCRNG
-{
+#include "G4Event.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4ios.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#include "Randomize.hh"
 
-EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
+namespace QCRNG{
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
 
-void EventAction::BeginOfEventAction(const G4Event*)
-{
-  fEdep = 0.;
-}
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  void EventAction::BeginOfEventAction(const G4Event* event){
+    fDetEnergy.clear();
+    fDetTime.clear();
+    double t = event->GetPrimaryVertex()->GetT0()/ns;
 
-void EventAction::EndOfEventAction(const G4Event*)
-{
-  // accumulate statistics in run action
-  fRunAction->AddEdep(fEdep);
-}
+    OutputManager::Instance().FillEvent(event->GetEventID(), t, QCRNGConfig::Instance().activity/(1./second));
+    
+    if(QCRNGConfig::Instance().verbose > 1)
+      G4cout << "event " << event->GetEventID() << " time " << event->GetPrimaryVertex()->GetT0()/ns << " ns" << G4endl;
+  }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+  void EventAction::EndOfEventAction(const G4Event* event){
+    
+    double decayTime = event->GetPrimaryVertex()->GetT0();
+    auto& cfg = QCRNGConfig::Instance();
+    
+    for(auto& hit : fDetEnergy){
+      int det = hit.first;
+      
+      double e_true = hit.second;
+      double tabs_true = fDetTime[det];
+      double t_true = tabs_true - decayTime;
+      
+      double sigmaE = cfg.energyResolution * e_true / 2.355;
+      double e_meas = G4RandGauss::shoot(e_true, sigmaE);
+      if(e_meas < 0.)
+	e_meas = 0.;
+      
+      double dt_smear = G4RandGauss::shoot(0., cfg.timingResolution);
+      double t_meas = t_true + dt_smear;
+      double tabs_meas = decayTime + t_meas;
+
+      if(cfg.verbose > 3)
+	G4cout << "t_true " << t_true << "\tt_meas " << t_meas << "\ttimingResolution = " << cfg.timingResolution/ns << " ns" << G4endl;
+      
+      if(e_meas < cfg.threshold)
+	continue;
+
+      
+      if(cfg.verbose > 1)
+	G4cout << "event " << event->GetEventID() << " det " << det << " E " << e_meas/keV << " keV" << " t " << t_meas/ns << " ns" << G4endl;
+ 
+      OutputManager::Instance().FillHit(event->GetEventID(), det, e_true/keV, e_meas/keV, t_true/ns, t_meas/ns, tabs_meas/ns);
+    }
+  }
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+  void EventAction::AddHit(int det, double edep, double time){
+    fDetEnergy[det] += edep;
+
+    if(!fDetTime.count(det) || time < fDetTime[det]){
+      fDetTime[det] =	time;
+    }
+  }
 }  // namespace QCRNG

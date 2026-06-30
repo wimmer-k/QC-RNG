@@ -28,12 +28,13 @@ namespace QCRNG{
     G4LogicalVolume* fScoringVolume = nullptr;
 
   private:
-    G4GenericMessenger* fMessenger = nullptr;
+    G4GenericMessenger* fGeometryMessenger = nullptr;
 
     G4double fSourceSize = 10*mm;
     G4double fDetLength  = 50*mm;
     G4double fGap        = 2*mm;
     G4double fDetAngle   = 45*deg;
+
   };
 
 }  // namespace QCRNG

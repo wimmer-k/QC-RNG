@@ -2,6 +2,7 @@
 /// \brief Implementation of the QCRNG::PrimaryGeneratorAction class
 
 #include "PrimaryGeneratorAction.hh"
+#include "QCRNGConfig.hh"
 
 #include "G4Box.hh"
 #include "G4LogicalVolume.hh"
@@ -12,18 +13,18 @@
 #include "Randomize.hh"
 #include <cmath>
 
-namespace QCRNG
-{
+namespace QCRNG{
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  PrimaryGeneratorAction::PrimaryGeneratorAction()
-  {
-    G4int n_particle = 1;
+  PrimaryGeneratorAction::PrimaryGeneratorAction(){
+    G4cout << "PrimaryGeneratorAction constructed"<< G4endl;
+
+        G4int n_particle = 1;
     fParticleGun = new G4ParticleGun(n_particle);
     G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("e+");
     fParticleGun->SetParticleDefinition(particle);
-    fParticleGun->SetParticleEnergy(0. * keV);
+    fParticleGun->SetParticleEnergy(50*keV);
   }
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -45,6 +46,30 @@ namespace QCRNG
     G4ThreeVector dir(sint*std::cos(phi), sint*std::sin(phi), cost);
     fParticleGun->SetParticleMomentumDirection(dir);
 
+
+    auto& cfg = QCRNGConfig::Instance();
+    if(fRemainingAtoms < 0)
+      fRemainingAtoms = cfg.nAtoms;
+    double activity = cfg.activity;
+
+    if(cfg.finiteSource){
+      double lambda = std::log(2.0)/cfg.halfLife;
+      activity = lambda*fRemainingAtoms;
+
+      if(fRemainingAtoms <= 0 || activity <= 0){
+	G4Exception("PrimaryGeneratorAction::GeneratePrimaries","QCRNG0001", FatalException, "Source exhausted.");
+      }
+
+      fRemainingAtoms -= 1.0;
+    }
+    //time in ns
+
+    double dt = -std::log(G4UniformRand())/activity;
+    fGlobalTime += dt;
+
+    fParticleGun->SetParticleTime(fGlobalTime*second);
+
+   
     // create event
     fParticleGun->GeneratePrimaryVertex(event);
 

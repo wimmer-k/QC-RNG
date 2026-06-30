@@ -1,30 +1,29 @@
-# Macro file for example B1
-# 
 # Can be run in batch, without graphic
 # or interactively: Idle> /control/execute run1.mac
 #
 # Change the default number of workers (in multi-threading mode) 
 #/run/numberOfThreads 4
-#
+/run/numberOfThreads 1
 # Initialize kernel
 /run/initialize
 #
-/control/verbose 2
-/run/verbose 2
-/event/verbose 0
-/tracking/verbose 1
-# 
-# gamma 6 MeV to the direction (0.,0.,1.)
+/qcrng/geometry/sourceSize 10 mm
+/qcrng/geometry/detLength 50 mm
+/qcrng/geometry/gap 1 mm
+/qcrng/geometry/detAngle 45 deg
+
+/qcrng/detector/material LYSO
+
+/gun/particle e+
+/gun/energy 40 keV 
 #
-/gun/particle gamma
-/gun/energy 6 MeV
+/qcrng/source/finiteSource true
+/qcrng/source/halfLife 10 s
+/qcrng/source/nAtoms 1000000
+
+/qcrng/detector/threshold 50 keV
+/qcrng/detector/energyResolution 0.05
+/qcrng/detector/timingResolution 1 ns
+/qcrng/detector/verbose 0
 #
-/run/beamOn 5
-# 
-# proton 210 MeV to the direction (0.,0.,1.)
-#
-/gun/particle proton
-/gun/energy 210 MeV
-/tracking/verbose 2
-#
-/run/beamOn 1
+/run/beamOn 10000

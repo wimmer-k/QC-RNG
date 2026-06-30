@@ -1,8 +1,11 @@
 /// \file QCRNG.cc
 /// \brief Main program QCRNG simulation
+#include "QCRNGConfig.hh"
 
 #include "ActionInitialization.hh"
 #include "DetectorConstruction.hh"
+#include "OutputManager.hh"
+
 #include "QBBC.hh"
 
 #include "G4RunManagerFactory.hh"
@@ -37,7 +40,9 @@ int main(int argc, char** argv)
   // Construct the default run manager
   //
   auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
-
+  QCRNGConfig::Instance();
+  OutputManager::Instance().Open("qcrng.root");
+  
   // Set mandatory initialization classes
   //
   // Detector construction
@@ -87,6 +92,8 @@ int main(int argc, char** argv)
   // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
 
+  OutputManager::Instance().Close();
+  
   delete visManager;
   delete runManager;
 }

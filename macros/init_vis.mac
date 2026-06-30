@@ -9,18 +9,25 @@
 # Change the default number of threads (in multi-threaded mode)
 #/run/numberOfThreads 4
 #
+/qcrng/geometry/sourceSize 10 mm
+/qcrng/geometry/detLength 50 mm
+/qcrng/geometry/gap 0 mm
+/qcrng/geometry/detAngle 45 deg
+
+/qcrng/source/activity 1 MBq
+
+/qcrng/detector/threshold 50 keV
+/qcrng/detector/energyResolution 0.08
+/qcrng/detector/timingResolution 0.2 ns
+
+
 # Initialize kernel
 /run/initialize
+
+/gun/particle e-
+/gun/energy 10 keV
+
 
 #
 # Visualization setting
 /control/execute vis.mac
-
-/tracking/storeTrajectory 1
-
-/vis/scene/add/trajectories smooth
-
-/vis/modeling/trajectories/create/drawByParticleID
-/vis/modeling/trajectories/drawByParticleID-0/default/setDrawStepPts true
-
-#/run/beamOn 1
