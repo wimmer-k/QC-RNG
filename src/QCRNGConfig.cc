@@ -27,12 +27,15 @@ namespace QCRNG{
     fDetectorMessenger->DeclareProperty("energyResolution", energyResolution, "Energy resolution (FWHM)");
     fDetectorMessenger->DeclarePropertyWithUnit("timingResolution", "ns", timingResolution, "Timing resolution (ns)");
 
-    fDetectorMessenger->DeclareProperty("verbose", verbose, "Verbosity level");
+    fOutputMessenger = new G4GenericMessenger(this, "/qcrng/output/", "Output control");
+    fOutputMessenger->DeclareProperty("filename", outputFile, "ROOT output file");
+    fOutputMessenger->DeclareProperty("verbose", verbose, "Verbosity level");
   }
 
   QCRNGConfig::~QCRNGConfig(){
     delete fSourceMessenger;
     delete fDetectorMessenger;
+    delete fOutputMessenger;
   }
 
 }

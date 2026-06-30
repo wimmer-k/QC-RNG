@@ -24,6 +24,7 @@ namespace QCRNG{
     G4double timingResolution = 0.1*ns;
 
     G4int verbose = 1;
+    G4String outputFile = "qcrng.root";
 
   private:
     QCRNGConfig();
@@ -34,6 +35,7 @@ namespace QCRNG{
 
     G4GenericMessenger* fSourceMessenger = nullptr;
     G4GenericMessenger* fDetectorMessenger = nullptr;
+    G4GenericMessenger* fOutputMessenger = nullptr;
   };
 
 }

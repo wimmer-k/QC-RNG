@@ -41,7 +41,6 @@ int main(int argc, char** argv)
   //
   auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
   QCRNGConfig::Instance();
-  OutputManager::Instance().Open("qcrng.root");
   
   // Set mandatory initialization classes
   //

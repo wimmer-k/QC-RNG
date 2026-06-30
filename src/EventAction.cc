@@ -64,6 +64,9 @@ namespace QCRNG{
  
       OutputManager::Instance().FillHit(event->GetEventID(), det, e_true/keV, e_meas/keV, t_true/ns, t_meas/ns, tabs_meas/ns);
     }
+    if(event->GetEventID() % 10000 == 0){
+      G4cout << "\rProcessed event " << event->GetEventID() << std::flush;
+    }
   }
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

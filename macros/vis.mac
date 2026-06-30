@@ -1,6 +1,4 @@
 # Macro file for the visualization setting in the initialization phase 
-# of the B1 example when running in interactive mode
-#
 
 # Specify a viewer, e.g., /vis/open OGL, or allow a system choice:
 /vis/open

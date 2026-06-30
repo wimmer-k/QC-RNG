@@ -33,7 +33,6 @@ target_link_libraries(QCRNG PRIVATE ${Geant4_LIBRARIES} ROOT::RIO ROOT::Tree)
 set(QCRNG_SCRIPTS
   init_vis.mac
   run1.mac
-  run2.mac
   vis.mac
   )
 

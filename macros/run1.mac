@@ -15,15 +15,19 @@
 /qcrng/detector/material LYSO
 
 /gun/particle e+
-/gun/energy 40 keV 
+/gun/energy 0 keV 
 #
 /qcrng/source/finiteSource true
-/qcrng/source/halfLife 10 s
+/qcrng/source/halfLife 100 s
 /qcrng/source/nAtoms 1000000
 
 /qcrng/detector/threshold 50 keV
 /qcrng/detector/energyResolution 0.05
 /qcrng/detector/timingResolution 1 ns
-/qcrng/detector/verbose 0
+
+
+/qcrng/output/verbose 0
+/qcrng/output/filename /home/wimmer/projects/QC_RNG/sim/data/test.root
+
 #
-/run/beamOn 10000
+/run/beamOn 100000
