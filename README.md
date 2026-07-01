@@ -43,7 +43,7 @@ Interactive mode:
 Batch mode:
 
 ```bash
-./QCRNG ../macros/run1.mac
+./QCRNG ../macros/run22Na.mac
 ```
 
 Simulation output is written to
@@ -61,7 +61,7 @@ Simulation parameters are controlled through Geant4 macro commands.
 Example:
 
 ```tcl
-/qcrng/geometry/sourceSize 10 mm
+/qcrng/detector/sourceSize 10 mm
 
 /qcrng/detector/material LYSO
 /qcrng/detector/threshold 50 keV
