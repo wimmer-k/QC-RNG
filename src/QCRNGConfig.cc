@@ -16,12 +16,20 @@ namespace QCRNG{
     new G4UnitDefinition("gigabecquerel", "GBq", "Activity", 1.0e9/second);
 
     fSourceMessenger = new G4GenericMessenger(this, "/qcrng/source/", "Source control");
+    fSourceMessenger->DeclareProperty("type", sourceType, "Source type: gamma, beta+, or isotope");
+    fSourceMessenger->DeclarePropertyWithUnit("energy", "keV", sourceEnergy, "Source particle energy");
+    fSourceMessenger->DeclareProperty("Z", sourceZ, "Source isotope Z");
+    fSourceMessenger->DeclareProperty("A", sourceA, "Source isotope A");
     fSourceMessenger->DeclarePropertyWithUnit("activity", "Bq", activity, "Source activity");
     fSourceMessenger->DeclareProperty("finiteSource", finiteSource, "Use finite radioactive source");
     fSourceMessenger->DeclarePropertyWithUnit("halfLife", "s", halfLife, "Source half-life");
     fSourceMessenger->DeclareProperty("nAtoms", nAtoms, "Initial number of radioactive atoms");
 
     fDetectorMessenger = new G4GenericMessenger(this, "/qcrng/detector/", "Detector control");
+    fDetectorMessenger->DeclarePropertyWithUnit("sourceSize", "mm", sourceSize);
+    fDetectorMessenger->DeclarePropertyWithUnit("detLength", "mm", detLength);
+    fDetectorMessenger->DeclarePropertyWithUnit("gap", "mm", gap);
+    fDetectorMessenger->DeclarePropertyWithUnit("detAngle", "deg", detAngle);
     fDetectorMessenger->DeclareProperty("material", detectorMaterial, "Detector material: LYSO or GAGG");
     fDetectorMessenger->DeclarePropertyWithUnit("threshold", "keV", threshold, "Detector threshold (keV)");
     fDetectorMessenger->DeclareProperty("energyResolution", energyResolution, "Energy resolution (FWHM)");

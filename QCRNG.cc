@@ -14,6 +14,7 @@
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 #include "G4EmStandardPhysics_option4.hh"
+#include "G4RadioactiveDecayPhysics.hh"
 
 // #include "Randomize.hh"
 
@@ -49,9 +50,8 @@ int main(int argc, char** argv)
 
   // Physics list
   auto physicsList = new QBBC;
-
   physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
-
+  physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics());
   physicsList->SetVerboseLevel(1);
 
   runManager->SetUserInitialization(physicsList);

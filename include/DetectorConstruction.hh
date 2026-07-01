@@ -5,7 +5,6 @@
 #define QCRNGDetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
-#include "G4GenericMessenger.hh"
 #include "G4SystemOfUnits.hh"
 
 class G4VPhysicalVolume;
@@ -17,8 +16,8 @@ namespace QCRNG{
 
   class DetectorConstruction : public G4VUserDetectorConstruction{
   public:
-    DetectorConstruction();
-    ~DetectorConstruction() override;
+    DetectorConstruction(){};
+    ~DetectorConstruction(){};
 
     G4VPhysicalVolume* Construct() override;
 
@@ -26,14 +25,6 @@ namespace QCRNG{
 
   protected:
     G4LogicalVolume* fScoringVolume = nullptr;
-
-  private:
-    G4GenericMessenger* fGeometryMessenger = nullptr;
-
-    G4double fSourceSize = 10*mm;
-    G4double fDetLength  = 50*mm;
-    G4double fGap        = 2*mm;
-    G4double fDetAngle   = 45*deg;
 
   };
 

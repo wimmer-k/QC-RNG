@@ -30,16 +30,9 @@ target_link_libraries(QCRNG PRIVATE ${Geant4_LIBRARIES} ROOT::RIO ROOT::Tree)
 # build. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(QCRNG_SCRIPTS
-  init_vis.mac
-  run1.mac
-  vis.mac
-  )
+file(GLOB QCRNG_SCRIPTS ${PROJECT_SOURCE_DIR}/macros/*.mac)
 
 foreach(_script ${QCRNG_SCRIPTS})
-  configure_file(
-    ${PROJECT_SOURCE_DIR}/macros/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
-    COPYONLY
-    )
+  get_filename_component(_script_name ${_script} NAME)
+  configure_file(${_script} ${PROJECT_BINARY_DIR}/${_script_name} COPYONLY)
 endforeach()

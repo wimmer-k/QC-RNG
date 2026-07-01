@@ -5,6 +5,7 @@
 #define QCRNGPrimaryGeneratorAction_h 1
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4ThreeVector.hh"
 #include "globals.hh"
 
 class G4ParticleGun;
@@ -27,6 +28,8 @@ namespace QCRNG{
     // method to access particle gun
     const G4ParticleGun* GetParticleGun() const { return fParticleGun; }
     double GetGlobalTime() const{return fGlobalTime;}
+    G4ThreeVector RandomDirection();
+    G4ThreeVector RandomSourcePosition();
 
   private:
     G4ParticleGun* fParticleGun = nullptr;  // pointer a to G4 gun class

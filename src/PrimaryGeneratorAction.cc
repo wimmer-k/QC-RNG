@@ -9,6 +9,7 @@
 #include "G4LogicalVolumeStore.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
+#include "G4IonTable.hh"
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 #include <cmath>
@@ -35,45 +36,94 @@ namespace QCRNG{
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-  void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event){
-    // Source position
-    fParticleGun->SetParticlePosition(G4ThreeVector(0, 0, 0));
-
-    // isotropic direction
+  G4ThreeVector PrimaryGeneratorAction::RandomDirection(){
     G4double cost = 2.*G4UniformRand()-1.;
     G4double sint = std::sqrt(1.-cost*cost);
     G4double phi = CLHEP::twopi*G4UniformRand();
-    G4ThreeVector dir(sint*std::cos(phi), sint*std::sin(phi), cost);
-    fParticleGun->SetParticleMomentumDirection(dir);
+    return G4ThreeVector(sint*std::cos(phi), sint*std::sin(phi), cost);
+  }
 
-
+  G4ThreeVector PrimaryGeneratorAction::RandomSourcePosition(){
     auto& cfg = QCRNGConfig::Instance();
+    G4double s = cfg.sourceSize;
+
+    return G4ThreeVector(s*(G4UniformRand()-0.5),
+			 s*(G4UniformRand()-0.5),
+			 s*(G4UniformRand()-0.5));
+  }
+  
+  void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event){
+    auto& cfg = QCRNGConfig::Instance();
+
+    fParticleGun->SetParticlePosition(RandomSourcePosition());
+
     if(fRemainingAtoms < 0)
       fRemainingAtoms = cfg.nAtoms;
-    double activity = cfg.activity;
 
+    double activity = cfg.activity;
+    
     if(cfg.finiteSource){
       double lambda = std::log(2.0)/cfg.halfLife;
       activity = lambda*fRemainingAtoms;
-
-      if(fRemainingAtoms <= 0 || activity <= 0){
-	G4Exception("PrimaryGeneratorAction::GeneratePrimaries","QCRNG0001", FatalException, "Source exhausted.");
-      }
-
+      
+      if(fRemainingAtoms <= 0 || activity <= 0)
+	G4Exception("PrimaryGeneratorAction::GeneratePrimaries", "QCRNG0001", FatalException, "No remaining ions.");
+      
       fRemainingAtoms -= 1.0;
     }
-    //time in ns
-
+    
     double dt = -std::log(G4UniformRand())/activity;
     fGlobalTime += dt;
-
+    
     fParticleGun->SetParticleTime(fGlobalTime*second);
+    
+    if(cfg.sourceType == "beta+"){
+      auto eplus = G4ParticleTable::GetParticleTable()->FindParticle("e+");
+      fParticleGun->SetParticleDefinition(eplus);
+      fParticleGun->SetParticleEnergy(cfg.sourceEnergy);
+      fParticleGun->SetParticleMomentumDirection(RandomDirection());
+      fParticleGun->GeneratePrimaryVertex(event);
+    }
+    else if(cfg.sourceType == "isotope"){
+      auto ion = G4IonTable::GetIonTable()->GetIon(cfg.sourceZ, cfg.sourceA, 0.0);
+      
+      fParticleGun->SetParticleDefinition(ion);
+      fParticleGun->SetParticleEnergy(0.0);
+      fParticleGun->SetParticleCharge(0.0);
+      fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0,0,1));
+      if(cfg.verbose > 0)
+	G4cout << "source type " << cfg.sourceType
+	       << " Z " << cfg.sourceZ
+	       << " A " << cfg.sourceA
+	       << " particle " << fParticleGun->GetParticleDefinition()->GetParticleName()
+	       << G4endl;
+      fParticleGun->GeneratePrimaryVertex(event);
+    }
+    else if(cfg.sourceType == "gamma"){
+      auto gamma = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+      fParticleGun->SetParticleDefinition(gamma);
+      fParticleGun->SetParticleEnergy(cfg.sourceEnergy);
+      fParticleGun->SetParticleMomentumDirection(RandomDirection());
+      fParticleGun->GeneratePrimaryVertex(event);
+    }
+    else if(cfg.sourceType == "annihil"){
+      auto gamma = G4ParticleTable::GetParticleTable()->FindParticle("gamma");
+      G4ThreeVector dir = RandomDirection();
+      fParticleGun->SetParticleDefinition(gamma);
+      fParticleGun->SetParticleEnergy(511.0*keV);
+      
+      fParticleGun->SetParticleMomentumDirection(dir);
+      fParticleGun->GeneratePrimaryVertex(event);
+      fParticleGun->SetParticleMomentumDirection(-dir);
+      fParticleGun->GeneratePrimaryVertex(event);
+    }
+    else{
+      G4Exception("PrimaryGeneratorAction::GeneratePrimaries", "QCRNG0002", FatalException, "Unknown source type.");
+    }
 
-   
-    // create event
-    fParticleGun->GeneratePrimaryVertex(event);
-
+    
   }
+
 
   //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

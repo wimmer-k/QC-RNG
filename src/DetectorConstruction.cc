@@ -40,18 +40,10 @@ namespace QCRNG{
   }
 
   
-  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-  DetectorConstruction::DetectorConstruction(){
-    fGeometryMessenger = new G4GenericMessenger(this, "/qcrng/geometry/", "Geometry control");
-    fGeometryMessenger->DeclarePropertyWithUnit("sourceSize", "mm", fSourceSize);
-    fGeometryMessenger->DeclarePropertyWithUnit("detLength", "mm", fDetLength);
-    fGeometryMessenger->DeclarePropertyWithUnit("gap", "mm", fGap);
-    fGeometryMessenger->DeclarePropertyWithUnit("detAngle", "deg", fDetAngle);
-   }
-
   G4VPhysicalVolume* DetectorConstruction::Construct(){    
     auto nist = G4NistManager::Instance();
-
+    auto& cfg = QCRNGConfig::Instance();
+    
     G4bool checkOverlaps = true;
 
     //
@@ -59,15 +51,15 @@ namespace QCRNG{
     //
     auto world_mat = nist->FindOrBuildMaterial("G4_AIR");
     auto source_mat = nist->FindOrBuildMaterial("G4_AIR");
-    auto det_mat = BuildDetectorMaterial(nist, QCRNGConfig::Instance().detectorMaterial);
+    auto det_mat = BuildDetectorMaterial(nist, cfg.detectorMaterial);
 
     //
     // Geometry parameters
     //
-    G4double source_size = fSourceSize;
-    G4double det_length  = fDetLength;
-    G4double gap         = fGap;
-    G4double det_angle   = fDetAngle;
+    G4double source_size = cfg.sourceSize;
+    G4double det_length  = cfg.detLength;
+    G4double gap         = cfg.gap;
+    G4double det_angle   = cfg.detAngle;
     
     // compute outer size
     G4double det_outer = source_size + 2.0 * det_length * std::tan(det_angle);
@@ -88,7 +80,7 @@ namespace QCRNG{
     new G4PVPlacement(nullptr, {}, logicSource, "Source", logicWorld, false, 0, checkOverlaps);
     
     //
-    // Detector frustum
+    // Detector
     //
     auto solidDet = new G4Trd("Detector",
 			      source_size/2, det_outer/2,
@@ -146,9 +138,5 @@ namespace QCRNG{
     return physWorld;
   }
 
-  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-  DetectorConstruction::~DetectorConstruction(){
-    delete fGeometryMessenger;   
-  }
   
 }  // namespace QCRNG
